@@ -2502,8 +2502,11 @@ srtp_err_status_t srtp_unprotect_mki(srtp_ctx_t *ctx,
         /* check replay database */
         if (!advance_packet_index) {
             status = srtp_rdbx_check(&stream->rtp_rdbx, delta);
-            if (status)
-                return status;
+            if (status) {
+                if (status == srtp_err_status_replay_fail && stream->allow_repeat_tx) {
+                    /* we do allow receiving an already received packet (as long it fits into our window_size) */
+                } else return status;
+            }
         }
     }
 
